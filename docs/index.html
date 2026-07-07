@@ -918,6 +918,16 @@
                 <path d="M4 6v6a8 3 0 0 0 16 0v-6" />
                 <path d="M4 12v6a8 3 0 0 0 16 0v-6" />
             </symbol>
+            <symbol id="i-download" viewBox="0 0 24 24">
+                <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                <path d="M7 11l5 5l5 -5" />
+                <path d="M12 4l0 12" />
+            </symbol>
+            <symbol id="i-upload" viewBox="0 0 24 24">
+                <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                <path d="M7 9l5 -5l5 5" />
+                <path d="M12 4l0 12" />
+            </symbol>
             <symbol id="i-folder" viewBox="0 0 24 24">
                 <path
                     d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2"
@@ -1349,6 +1359,13 @@
                                 Named secrets like <em>staging-api</em>, shared
                                 by encoder &amp; decoder
                             </li>
+                            <li>
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-check" />
+                                </svg>
+                                Export everything to a JSON file &amp; import it
+                                back — duplicates can be overwritten or skipped
+                            </li>
                         </ul>
                     </div>
                     <div class="visual">
@@ -1382,6 +1399,13 @@
                                     <use href="#i-key" />
                                 </svg>
                                 Secret library <span class="meta">4 saved</span>
+                            </div>
+                            <div class="wire-row">
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-download" />
+                                </svg>
+                                Export backup
+                                <span class="meta">jwt-workbench.json</span>
                             </div>
                         </div>
                     </div>
@@ -1583,6 +1607,17 @@
                         <p>
                             Write an exp claim of now + 5 minutes up to 1 year
                             with a single tap.
+                        </p>
+                    </div>
+                    <div class="cell">
+                        <svg class="ti" aria-hidden="true">
+                            <use href="#i-upload" />
+                        </svg>
+                        <b>Import &amp; export</b>
+                        <p>
+                            Back up all projects and secrets to a JSON file and
+                            import them on any machine — overwrite or skip
+                            duplicates.
                         </p>
                     </div>
                     <div class="cell">
