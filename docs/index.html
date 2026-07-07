@@ -548,8 +548,11 @@
                 font-size: 10.5px;
                 line-height: 1.7;
                 color: var(--ink);
-                white-space: pre;
                 overflow-x: auto;
+            }
+
+            .sp-code > div {
+                white-space: nowrap;
             }
 
             .sp-token {
@@ -1347,8 +1350,9 @@
                                 </div>
                                 <div class="sp-label">Payload</div>
                                 <div class="sp-code">
-                                    "sub": "user-42", "role": "admin", "exp":
-                                    1767225600
+                                    <div>"sub": "user-42",</div>
+                                    <div>"role": "admin",</div>
+                                    <div>"exp": 1767225600</div>
                                 </div>
                                 <div class="sp-label">Signed token</div>
                                 <div class="sp-token">
@@ -1526,8 +1530,9 @@
                                 Decode from clipboard
                             </div>
                             <div class="sp-code">
-                                "sub": "user-42", "iat": 1751846400 → Jul 7,
-                                2026 08:00 "exp": 1751850000 → Jul 7, 2026 09:00
+                                <div>"sub": "user-42",</div>
+                                <div>"iat": 1751846400 → Jul 7, 2026 08:00</div>
+                                <div>"exp": 1751850000 → Jul 7, 2026 09:00</div>
                             </div>
                             <div class="sp-row" style="margin-top: 14px">
                                 <span class="tag"
