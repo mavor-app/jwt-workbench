@@ -25,8 +25,9 @@ export interface JwtProject {
 }
 
 export const DEFAULT_HEADER = JSON.stringify({ alg: 'HS256', typ: 'JWT' }, null, 2);
+// exp defaults to 10 minutes from when the panel loads.
 export const DEFAULT_PAYLOAD = JSON.stringify(
-  { sub: '1234567890', name: 'John Doe', iat: 1516239022 },
+  { sub: '1234567890', name: 'John Doe', exp: Math.floor(Date.now() / 1000) + 10 * 60 },
   null,
   2,
 );

@@ -1,7 +1,23 @@
 import * as React from 'react';
-import { IconCopyPlus, IconDeviceFloppy, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
+import {
+  IconCopyPlus,
+  IconDeviceFloppy,
+  IconDotsVertical,
+  IconPencil,
+  IconPlus,
+  IconTrash,
+} from '@tabler/icons-react';
 import { toast } from 'sonner';
 
+import { Button } from '@/components/ui/button';
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -9,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { IconButton } from '@/components/IconButton';
 import { NameDialog } from '@/components/NameDialog';
@@ -37,16 +54,22 @@ export function ProjectBar({
   onRename,
   onDelete,
 }: ProjectBarProps) {
+  const [menuOpen, setMenuOpen] = React.useState(false);
   const [saveAsOpen, setSaveAsOpen] = React.useState(false);
   const [renameOpen, setRenameOpen] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
+
+  const openDialog = (setOpen: (open: boolean) => void) => {
+    setMenuOpen(false);
+    setOpen(true);
+  };
 
   return (
     <div className="flex items-center gap-1">
       <div className="relative min-w-0 flex-1">
         <Select value={currentProject?.id ?? ''} onValueChange={onSelect}>
           <SelectTrigger size="sm" className="w-full" aria-label="Project">
-            <span className="flex min-w-0 items-center gap-1.5">
+            <span className="flex min-w-0 flex-1 items-center gap-1.5">
               {dirty && <span className="bg-primary size-1.5 shrink-0 rounded-full" title="Unsaved changes" />}
               <SelectValue placeholder="Untitled" />
             </span>
@@ -57,7 +80,7 @@ export function ProjectBar({
             )}
             {projects.map((p) => (
               <SelectItem key={p.id} value={p.id}>
-                {p.name}
+                <span className="truncate">{p.name}</span>
               </SelectItem>
             ))}
           </SelectContent>
@@ -74,15 +97,50 @@ export function ProjectBar({
       >
         <IconDeviceFloppy />
       </IconButton>
-      <IconButton label="Save as…" onClick={() => setSaveAsOpen(true)}>
-        <IconCopyPlus />
-      </IconButton>
-      <IconButton label="Rename project" onClick={() => setRenameOpen(true)} disabled={!currentProject}>
-        <IconPencil />
-      </IconButton>
-      <IconButton label="Delete project" onClick={() => setDeleteOpen(true)} disabled={!currentProject}>
-        <IconTrash className="text-destructive" />
-      </IconButton>
+      <Popover open={menuOpen} onOpenChange={setMenuOpen}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon-sm" aria-label="Project actions">
+                <IconDotsVertical />
+              </Button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Project actions</TooltipContent>
+        </Tooltip>
+        <PopoverContent className="w-44 p-0" align="end">
+          <Command>
+            <CommandList>
+              <CommandGroup>
+                <CommandItem value="save-as" onSelect={() => openDialog(setSaveAsOpen)}>
+                  <IconCopyPlus />
+                  Save as…
+                </CommandItem>
+                <CommandItem
+                  value="rename"
+                  disabled={!currentProject}
+                  onSelect={() => openDialog(setRenameOpen)}
+                >
+                  <IconPencil />
+                  Rename
+                </CommandItem>
+              </CommandGroup>
+              <CommandSeparator />
+              <CommandGroup>
+                <CommandItem
+                  value="delete"
+                  disabled={!currentProject}
+                  className="text-destructive data-[selected=true]:text-destructive"
+                  onSelect={() => openDialog(setDeleteOpen)}
+                >
+                  <IconTrash className="text-destructive" />
+                  Delete
+                </CommandItem>
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
 
       <NameDialog
         open={saveAsOpen}

@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Toaster } from '@/components/ui/sonner';
 import { DecoderTab } from '@/components/DecoderTab';
 import { EncoderTab } from '@/components/EncoderTab';
+import { TransferBar } from '@/components/TransferBar';
 import { store } from '@/lib/storage';
 
 export default function App() {
@@ -64,6 +65,7 @@ export default function App() {
           />
         </TabsContent>
       </Tabs>
+      <TransferBar />
       <Toaster position="bottom-center" />
     </div>
   );

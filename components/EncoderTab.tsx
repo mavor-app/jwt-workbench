@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select';
 import { CopyButton } from '@/components/CopyButton';
 import { ExpMenu } from '@/components/ExpMenu';
+import { ExpStatus } from '@/components/ExpStatus';
 import { JsonEditor } from '@/components/JsonEditor';
 import { ProjectBar } from '@/components/ProjectBar';
 import { SecretPicker } from '@/components/SecretPicker';
@@ -177,13 +178,16 @@ export function EncoderTab({ currentProjectId, onSelectProject }: EncoderTabProp
           </Select>
         }
       />
-      <JsonEditor
-        label="Payload"
-        value={draft.payload}
-        onChange={(payload) => setDraft((d) => ({ ...d, payload }))}
-        minRows={8}
-        actions={<ExpMenu payload={draft.payload} onChange={(payload) => setDraft((d) => ({ ...d, payload }))} />}
-      />
+      <div className="flex flex-col gap-1">
+        <JsonEditor
+          label="Payload"
+          value={draft.payload}
+          onChange={(payload) => setDraft((d) => ({ ...d, payload }))}
+          minRows={8}
+          actions={<ExpMenu payload={draft.payload} onChange={(payload) => setDraft((d) => ({ ...d, payload }))} />}
+        />
+        <ExpStatus payload={draft.payload} />
+      </div>
 
       <div className="flex flex-col gap-1">
         <Label className="text-muted-foreground h-7 items-center text-xs uppercase tracking-wide">
