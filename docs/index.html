@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="JWT Workbench — a fast, private JSON Web Token toolkit in your browser's side panel. Encode, decode, verify and manage JWTs. 100% local, no network requests."
+  />
+  <title>JWT Workbench — The JWT toolkit that lives in your side panel</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="icon/16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icon/32.png" />
+  <link rel="apple-touch-icon" href="icon/128.png" />
+  <style>
+    :root {
+      --ink: #111111;
+      --text: #444444;
+      --muted: #8a8a8a;
+      --faint: #b5b5b5;
+      --line: #111111;
+      --line-soft: #dddddd;
+      --bg: #ffffff;
+      --bg-soft: #f5f5f4;
+      --radius: 6px;
+      --font: "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Inter, Roboto, Arial, sans-serif;
+      --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
+        "Liberation Mono", monospace;
+    }
+
+    svg.ti {
+      width: 1em;
+      height: 1em;
+      flex: none;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vertical-align: -0.125em;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+
+    /* ---------- Nav ---------- */
+
+    nav.top {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      padding: 26px 0;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-weight: 700;
+      font-size: 19px;
+      color: var(--ink);
+      letter-spacing: -0.3px;
+    }
+
+    .logo img { display: block; border-radius: 6px; }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .nav-links a:hover { opacity: 0.6; }
+
+    .nav-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 11px 24px;
+      border-radius: 999px;
+      transition: opacity 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover { opacity: 0.82; }
+
+    .btn.ghost {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--ink);
+    }
+
+    @media (max-width: 760px) {
+      .nav-links { display: none; }
+    }
+
+    /* ---------- Hero ---------- */
+
+    .hero {
+      text-align: center;
+      padding: 84px 0 0;
+    }
+
+    .hero h1 {
+      margin: 0 auto;
+      max-width: 900px;
+      font-size: clamp(38px, 6.4vw, 68px);
+      line-height: 1.08;
+      font-weight: 700;
+      letter-spacing: -2px;
+      color: var(--ink);
+    }
+
+    .hero-sub {
+      max-width: 620px;
+      margin: 26px auto 0;
+      font-size: 18px;
+      color: var(--text);
+    }
+
+    .hero-cta { margin-top: 38px; }
+
+    .hero-cta .btn { font-size: 16px; padding: 15px 34px; }
+
+    .hero-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 18px;
+      font-size: 14.5px;
+      color: var(--text);
+    }
+
+    .hero-note svg.ti { font-size: 17px; }
+
+    /* ---------- Hero visual (wireframe) ---------- */
+
+    .stage {
+      position: relative;
+      margin: 72px auto 0;
+      display: grid;
+      grid-template-columns: minmax(0, 220px) minmax(0, 1fr) minmax(0, 250px);
+      gap: 28px;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .stage { grid-template-columns: 1fr; }
+      .stage-side { display: none; }
+    }
+
+    .stage-side { display: grid; gap: 22px; }
+
+    .float-card {
+      border: 1px solid var(--ink);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 16px 18px;
+      text-align: left;
+      font-size: 13.5px;
+      box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.06);
+    }
+
+    .float-card b {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      font-size: 13.5px;
+      margin-bottom: 4px;
+    }
+
+    .float-card b svg.ti { font-size: 16px; }
+
+    .float-card span {
+      color: var(--muted);
+      font-size: 12.5px;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .float-card.tilt-l { transform: rotate(-3deg); }
+    .float-card.tilt-r { transform: rotate(2.5deg); }
+
+    /* browser frame */
+    .browser {
+      border: 1px solid var(--ink);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+      text-align: left;
+      box-shadow: 6px 6px 0 rgba(17, 17, 17, 0.06);
+    }
+
+    .browser-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .b-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--line-soft);
+    }
+
+    .b-url {
+      flex: 1;
+      height: 22px;
+      margin-left: 8px;
+      border: 1px solid var(--line-soft);
+      border-radius: 999px;
+      background: var(--bg-soft);
+    }
+
+    .browser-body {
+      display: grid;
+      grid-template-columns: 1fr 240px;
+      min-height: 340px;
+    }
+
+    @media (max-width: 560px) {
+      .browser-body { grid-template-columns: 1fr; }
+      .page-ghost { display: none; }
+    }
+
+    .page-ghost { padding: 22px; }
+
+    .ghost-line {
+      height: 9px;
+      border-radius: 999px;
+      background: #ececeb;
+      margin-bottom: 12px;
+    }
+
+    .ghost-block {
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      background: var(--bg-soft);
+      height: 84px;
+      margin: 18px 0;
+    }
+
+    /* side panel inside the browser */
+    .sidepanel {
+      border-left: 1px solid var(--ink);
+      padding: 16px;
+      font-size: 12px;
+      background: #fff;
+    }
+
+    .sp-head {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 700;
+      color: var(--ink);
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .sp-head svg.ti { font-size: 16px; }
+
+    .sp-tabs {
+      display: flex;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      font-weight: 600;
+      font-size: 11.5px;
+    }
+
+    .sp-tab { flex: 1; text-align: center; padding: 6px 0; color: var(--muted); }
+    .sp-tab.on { background: var(--ink); color: #fff; }
+
+    .sp-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 12px 0 5px;
+    }
+
+    .sp-code {
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      background: var(--bg-soft);
+      padding: 9px 10px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      line-height: 1.7;
+      color: var(--ink);
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .sp-token {
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      padding: 9px 10px;
+      font-family: var(--mono);
+      font-size: 10px;
+      line-height: 1.6;
+      word-break: break-all;
+      color: var(--muted);
+    }
+
+    .sp-token .t1 { color: var(--ink); font-weight: 700; }
+    .sp-token .t2 { color: #6b6b6b; }
+    .sp-token .t3 { color: #9c9c9c; }
+
+    .sp-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .tag.fill { background: var(--ink); color: #fff; }
+
+    /* ---------- Proof strip ---------- */
+
+    .strip {
+      margin-top: 84px;
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--ink);
+      padding: 26px 0;
+    }
+
+    .strip-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 18px 56px;
+    }
+
+    .stat { display: flex; align-items: baseline; gap: 12px; }
+
+    .stat b {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      color: var(--ink);
+    }
+
+    .stat span { font-size: 14.5px; color: var(--text); }
+
+    /* ---------- Sections ---------- */
+
+    section { padding: 108px 0 0; }
+
+    .kicker {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 14px;
+    }
+
+    .sec-title {
+      text-align: center;
+      font-size: clamp(30px, 4.6vw, 46px);
+      font-weight: 700;
+      letter-spacing: -1.4px;
+      line-height: 1.12;
+      color: var(--ink);
+      margin: 0 0 16px;
+    }
+
+    .sec-sub {
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto;
+      font-size: 17px;
+    }
+
+    /* feature rows */
+    .feature {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(32px, 6vw, 80px);
+      align-items: center;
+      margin-top: 84px;
+    }
+
+    @media (max-width: 800px) {
+      .feature { grid-template-columns: 1fr; }
+      .feature.flip .feature-copy { order: -1; }
+    }
+
+    .feature h3 {
+      font-size: clamp(24px, 3.2vw, 32px);
+      font-weight: 700;
+      letter-spacing: -0.8px;
+      line-height: 1.18;
+      color: var(--ink);
+      margin: 0 0 16px;
+    }
+
+    .feature p { margin: 0 0 12px; font-size: 16px; }
+
+    .feature ul { margin: 18px 0 0; padding: 0; list-style: none; }
+
+    .feature li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .feature li svg.ti { color: var(--ink); font-size: 18px; margin-top: 3px; flex: none; }
+
+    .feature code { font-family: var(--mono); font-size: 14px; color: var(--ink); }
+
+    /* wireframe visual cards */
+    .visual { min-width: 0; }
+
+    .wire {
+      border: 1px solid var(--ink);
+      border-radius: 8px;
+      background: #fff;
+      padding: 20px;
+      font-size: 13px;
+      box-shadow: 6px 6px 0 rgba(17, 17, 17, 0.06);
+    }
+
+    .wire + .wire { margin-top: 16px; }
+
+    .wire-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      color: var(--ink);
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--line-soft);
+      font-size: 14px;
+    }
+
+    .wire-head svg.ti { font-size: 17px; }
+
+    .wire-row {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 10px 2px;
+      color: var(--ink);
+      font-weight: 500;
+      border-bottom: 1px solid var(--line-soft);
+      font-size: 13.5px;
+    }
+
+    .wire-row:last-child { border-bottom: 0; }
+    .wire-row svg.ti { font-size: 17px; }
+    .wire-row .meta { margin-left: auto; font-family: var(--mono); font-size: 11.5px; color: var(--muted); font-weight: 400; }
+
+    .wire-row .radio {
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid var(--ink);
+      border-radius: 999px;
+      flex: none;
+    }
+
+    .wire-row .radio.on { box-shadow: inset 0 0 0 3.5px #fff; background: var(--ink); }
+
+    .wire .sp-code { font-size: 11.5px; }
+
+    /* ---------- Privacy ---------- */
+
+    .privacy {
+      margin-top: 108px;
+      border-top: 1px solid var(--ink);
+      padding-top: 84px;
+    }
+
+    .privacy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 0;
+      margin-top: 56px;
+      border: 1px solid var(--ink);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .privacy-cell {
+      padding: 30px 28px;
+      border-right: 1px solid var(--line-soft);
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .privacy-cell svg.ti { font-size: 26px; color: var(--ink); }
+    .privacy-cell b { display: block; color: var(--ink); font-size: 16px; margin: 14px 0 6px; }
+    .privacy-cell p { margin: 0; font-size: 14.5px; }
+
+    /* ---------- Feature grid ---------- */
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 18px;
+      margin-top: 56px;
+    }
+
+    .cell {
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      padding: 26px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .cell:hover {
+      border-color: var(--ink);
+      box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.08);
+    }
+
+    .cell svg.ti { font-size: 24px; color: var(--ink); }
+    .cell b { display: block; color: var(--ink); font-size: 16px; margin: 14px 0 5px; }
+    .cell p { margin: 0; font-size: 14.5px; }
+
+    /* ---------- Install ---------- */
+
+    .steps {
+      counter-reset: step;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-top: 56px;
+    }
+
+    .step {
+      border: 1px solid var(--ink);
+      border-radius: 8px;
+      padding: 28px;
+      box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.06);
+    }
+
+    .step::before {
+      counter-increment: step;
+      content: "0" counter(step);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    .step b { display: block; color: var(--ink); font-size: 17px; margin: 12px 0 6px; }
+    .step p { margin: 0; font-size: 14.5px; }
+
+    .step code {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      background: var(--bg-soft);
+      border: 1px solid var(--line-soft);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--ink);
+    }
+
+    /* ---------- CTA ---------- */
+
+    .cta {
+      margin-top: 108px;
+      background: var(--ink);
+      border-radius: 12px;
+      text-align: center;
+      padding: clamp(52px, 8vw, 88px) 28px;
+      color: #bbbbbb;
+    }
+
+    .cta h2 {
+      color: #fff;
+      font-size: clamp(30px, 4.6vw, 48px);
+      font-weight: 700;
+      letter-spacing: -1.4px;
+      line-height: 1.1;
+      margin: 0 0 14px;
+    }
+
+    .cta p { max-width: 520px; margin: 0 auto; font-size: 16.5px; }
+
+    .cta-btns {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 36px;
+    }
+
+    .cta .btn { background: #fff; color: var(--ink); font-size: 16px; padding: 14px 30px; }
+    .cta .btn.ghost { background: transparent; color: #fff; border: 1px solid #555; }
+
+    /* ---------- Footer ---------- */
+
+    footer {
+      margin-top: 32px;
+      padding: 44px 0 40px;
+      border-top: 1px solid var(--line-soft);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px 32px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    footer .logo { font-size: 16px; }
+    footer .links { display: flex; gap: 24px; font-weight: 500; color: var(--text); }
+    footer .links a:hover { color: var(--ink); }
+    footer .note { margin-left: auto; }
+
+    @media (max-width: 700px) {
+      footer .note { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none" aria-hidden="true">
+    <symbol id="i-brand-chrome" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M12 9h8.4"/><path d="M14.598 13.5l-4.2 7.275"/><path d="M9.402 13.5l-4.2 -7.275"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5l10 -10"/></symbol>
+    <symbol id="i-clipboard-check" viewBox="0 0 24 24"><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><path d="M9 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2"/><path d="M9 14l2 2l4 -4"/></symbol>
+    <symbol id="i-clipboard-text" viewBox="0 0 24 24"><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><path d="M9 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2"/><path d="M9 12h6"/><path d="M9 16h6"/></symbol>
+    <symbol id="i-clock-plus" viewBox="0 0 24 24"><path d="M20.984 12.535a9 9 0 1 0 -8.468 8.45"/><path d="M16 19h6"/><path d="M19 16v6"/><path d="M12 7v5l3 3"/></symbol>
+    <symbol id="i-clock-x" viewBox="0 0 24 24"><path d="M20.926 13.15a9 9 0 1 0 -7.835 7.784"/><path d="M12 7v5l2 2"/><path d="M22 22l-5 -5"/><path d="M17 22l5 -5"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="M7 8l-4 4l4 4"/><path d="M17 8l4 4l-4 4"/><path d="M14 4l-4 16"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><path d="M7 9.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667l0 -8.666"/><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24"><path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0"/><path d="M4 6v6a8 3 0 0 0 16 0v-6"/><path d="M4 12v6a8 3 0 0 0 16 0v-6"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2"/></symbol>
+    <symbol id="i-folders" viewBox="0 0 24 24"><path d="M9 3h3l2 2h5a2 2 0 0 1 2 2v7a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><path d="M17 16v2a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2h2"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><path d="M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1 -4.069 0l-.301 -.301l-6.558 6.558a2 2 0 0 1 -1.239 .578l-.175 .008h-1.172a1 1 0 0 1 -.993 -.883l-.007 -.117v-1.172a2 2 0 0 1 .467 -1.284l.119 -.13l.414 -.414h2v-2h2v-2l2.144 -2.144l-.301 -.301a2.877 2.877 0 0 1 0 -4.069l2.643 -2.643a2.877 2.877 0 0 1 4.069 0"/><path d="M15 9h.01"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6"/><path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"/><path d="M8 11v-4a4 4 0 1 1 8 0v4"/></symbol>
+    <symbol id="i-moon-stars" viewBox="0 0 24 24"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/><path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2"/><path d="M19 11h2m-1 -1v2"/></symbol>
+    <symbol id="i-pencil-code" viewBox="0 0 24 24"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/><path d="M13.5 6.5l4 4"/><path d="M20 21l2 -2l-2 -2"/><path d="M17 17l-2 2l2 2"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></symbol>
+    <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M11.46 20.846a12 12 0 0 1 -7.96 -14.846a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3a12 12 0 0 1 -.09 7.06"/><path d="M15 19l2 2l4 -4"/></symbol>
+    <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M12 18l.01 0"/><path d="M9.172 15.172a4 4 0 0 1 5.656 0"/><path d="M6.343 12.343a7.963 7.963 0 0 1 3.864 -2.14m4.163 .155a7.965 7.965 0 0 1 3.287 2"/><path d="M3.515 9.515a12 12 0 0 1 3.544 -2.455m3.101 -.92a12 12 0 0 1 10.325 3.374"/><path d="M3 3l18 18"/></symbol>
+  </svg>
+
+  <div class="wrap">
+    <!-- ================= Nav ================= -->
+    <nav class="top">
+      <a class="logo" href="#"><img src="icon/32.png" alt="" width="26" height="26" />JWT Workbench</a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#install">Install</a>
+      </div>
+      <div class="nav-right">
+        <a href="https://github.com/mavor-app/jwt-workbench" target="_blank" rel="noopener">GitHub</a>
+        <a class="btn" href="https://chrome.google.com/webstore" target="_blank" rel="noopener">Add to Chrome</a>
+      </div>
+    </nav>
+
+    <!-- ================= Hero ================= -->
+    <header class="hero">
+      <h1>The JWT toolkit<br />that lives in your side panel</h1>
+      <p class="hero-sub">
+        Encode, decode, verify, and manage JSON Web Tokens without switching tabs —
+        everything runs locally, so your tokens and secrets never leave the browser.
+      </p>
+      <div class="hero-cta">
+        <a class="btn" href="https://chrome.google.com/webstore" target="_blank" rel="noopener">Add to Chrome</a>
+      </div>
+      <div class="hero-note">
+        <svg class="ti" aria-hidden="true"><use href="#i-brand-chrome"/></svg> Available in the Chrome Web Store
+      </div>
+
+      <!-- wireframe hero visual (no screenshots) -->
+      <div class="stage" role="img" aria-label="Illustration of the JWT Workbench side panel next to a webpage">
+        <div class="stage-side" aria-hidden="true">
+          <div class="float-card tilt-l">
+            <b><svg class="ti" aria-hidden="true"><use href="#i-shield-check"/></svg> Signature verified</b>
+            <span>HS256 · secret “staging-api”</span>
+          </div>
+          <div class="float-card tilt-r">
+            <b><svg class="ti" aria-hidden="true"><use href="#i-clock-x"/></svg> Token expired</b>
+            <span>exp · 12 minutes ago</span>
+          </div>
+        </div>
+
+        <div class="browser" aria-hidden="true">
+          <div class="browser-top">
+            <span class="b-dot"></span><span class="b-dot"></span><span class="b-dot"></span>
+            <span class="b-url"></span>
+          </div>
+          <div class="browser-body">
+            <div class="page-ghost">
+              <div class="ghost-line" style="width: 46%"></div>
+              <div class="ghost-line" style="width: 88%"></div>
+              <div class="ghost-line" style="width: 74%"></div>
+              <div class="ghost-block"></div>
+              <div class="ghost-line" style="width: 82%"></div>
+              <div class="ghost-line" style="width: 58%"></div>
+            </div>
+            <div class="sidepanel">
+              <div class="sp-head"><img src="icon/16.png" alt="" width="16" height="16" /> JWT Workbench</div>
+              <div class="sp-tabs">
+                <span class="sp-tab on">Encoder</span>
+                <span class="sp-tab">Decoder</span>
+              </div>
+              <div class="sp-label">Payload</div>
+              <div class="sp-code">"sub": "user-42",
+"role": "admin",
+"exp": 1767225600</div>
+              <div class="sp-label">Signed token</div>
+              <div class="sp-token"><span class="t1">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span>.<span class="t2">eyJzdWIiOiJ1c2VyLTQyIiwicm9sZSI6ImFkbWluIn0</span>.<span class="t3">sflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span></div>
+              <div class="sp-row">
+                <span class="tag"><svg class="ti" aria-hidden="true"><use href="#i-lock"/></svg> HS256</span>
+                <span class="tag fill"><svg class="ti" aria-hidden="true"><use href="#i-copy"/></svg> Copy</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stage-side" aria-hidden="true">
+          <div class="float-card tilt-r">
+            <b><svg class="ti" aria-hidden="true"><use href="#i-clipboard-text"/></svg> Decoded from clipboard</b>
+            <span>header · payload · claims</span>
+          </div>
+          <div class="float-card tilt-l">
+            <b><svg class="ti" aria-hidden="true"><use href="#i-folder"/></svg> Project saved</b>
+            <span>“auth-service” · HS512</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- proof strip -->
+      <div class="strip">
+        <div class="strip-inner">
+          <div class="stat"><b>0</b><span>network requests</span></div>
+          <div class="stat"><b>100%</b><span>local &amp; private</span></div>
+          <div class="stat"><b>3</b><span>HMAC algorithms</span></div>
+          <div class="stat"><b>MIT</b><span>open source</span></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================= Features ================= -->
+    <section id="features">
+      <p class="kicker">Features</p>
+      <h2 class="sec-title">Everything a token workflow needs,<br />one click away</h2>
+      <p class="sec-sub">
+        Keep it open beside your app, API console, docs, or logs while you inspect bearer tokens,
+        edit claims, re-sign payloads, and verify signatures.
+      </p>
+
+      <!-- Encoder -->
+      <div class="feature">
+        <div class="feature-copy">
+          <h3>Encode &amp; re-sign tokens in real time</h3>
+          <p>
+            Edit the header and payload as JSON with live syntax highlighting and one-click
+            formatting. The signed token updates as you type.
+          </p>
+          <ul>
+            <li><svg class="ti" aria-hidden="true"><use href="#i-check"/></svg> Choose HS256, HS384, or HS512 from a dropdown</li>
+            <li><svg class="ti" aria-hidden="true"><use href="#i-check"/></svg> Live, highlighted output token</li>
+            <li><svg class="ti" aria-hidden="true"><use href="#i-check"/></svg> Copy the finished token with one click</li>
+          </ul>
+        </div>
+        <div class="visual">
+          <div class="wire">
+            <div class="wire-head"><svg class="ti" aria-hidden="true"><use href="#i-lock"/></svg> Which algorithm would you like to sign with?</div>
+            <div class="wire-row"><span class="radio on"></span> HS256 <span class="meta">HMAC · SHA-256</span></div>
+            <div class="wire-row"><span class="radio"></span> HS384 <span class="meta">HMAC · SHA-384</span></div>
+            <div class="wire-row"><span class="radio"></span> HS512 <span class="meta">HMAC · SHA-512</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Decoder -->
+      <div class="feature flip">
+        <div class="visual">
+          <div class="wire">
+            <div class="wire-head"><svg class="ti" aria-hidden="true"><use href="#i-clipboard-text"/></svg> Decode from clipboard</div>
+            <div class="sp-code">"sub": "user-42",
+"iat": 1751846400   → Jul 7, 2026 08:00
+"exp": 1751850000   → Jul 7, 2026 09:00</div>
+            <div class="sp-row" style="margin-top: 14px">
+              <span class="tag"><svg class="ti" aria-hidden="true"><use href="#i-clock-x"/></svg> Expired</span>
+              <span class="tag"><svg class="ti" aria-hidden="true"><use href="#i-shield-check"/></svg> Signature verified</span>
+            </div>
+          </div>
+        </div>
+        <div class="feature-copy">
+          <h3>Decode any token in one click</h3>
+          <p>
+            One button decodes a JWT straight from your clipboard — or paste it manually.
+            The clipboard is read only when you press the button.
+          </p>
+          <ul>
+            <li><svg class="ti" aria-hidden="true"><use href="#i-check"/></svg> Highlighted header &amp; payload JSON</li>
+            <li><svg class="ti" aria-hidden="true"><use href="#i-check"/></svg> Human-readable <code>exp</code> / <code>iat</code> / <code>nbf</code> timestamps</li>
+            <li><svg class="ti" aria-hidden="true"><use href="#i-check"/></svg> “Expired” badge &amp; optional signature verification</li>
+            <li><svg class="ti" aria-hidden="true"><use href="#i-check"/></svg> Turn any decoded token into a project in one click</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Projects & secrets -->
+      <div class="feature">
+        <div class="feature-copy">
+          <h3>Reusable projects &amp; a secret library</h3>
+          <p>
+            Stop rebuilding the same test tokens from scratch. Save header + payload + secret
+            as a named project, reopen it later, tweak a claim, and copy a fresh token.
+          </p>
+          <ul>
+            <li><svg class="ti" aria-hidden="true"><use href="#i-check"/></svg> Full project CRUD: new, save, save as, rename, delete</li>
+            <li><svg class="ti" aria-hidden="true"><use href="#i-check"/></svg> Last opened project restored automatically</li>
+            <li><svg class="ti" aria-hidden="true"><use href="#i-check"/></svg> Named secrets like <em>staging-api</em>, shared by encoder &amp; decoder</li>
+          </ul>
+        </div>
+        <div class="visual">
+          <div class="wire">
+            <div class="wire-head"><svg class="ti" aria-hidden="true"><use href="#i-folders"/></svg> Projects</div>
+            <div class="wire-row"><svg class="ti" aria-hidden="true"><use href="#i-folder"/></svg> staging-api <span class="meta">HS256</span></div>
+            <div class="wire-row"><svg class="ti" aria-hidden="true"><use href="#i-folder"/></svg> auth-service <span class="meta">HS512</span></div>
+            <div class="wire-row"><svg class="ti" aria-hidden="true"><use href="#i-folder"/></svg> qa-webhooks <span class="meta">HS256</span></div>
+            <div class="wire-row"><svg class="ti" aria-hidden="true"><use href="#i-key"/></svg> Secret library <span class="meta">4 saved</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expiration presets -->
+      <div class="feature flip">
+        <div class="visual">
+          <div class="wire">
+            <div class="wire-head"><svg class="ti" aria-hidden="true"><use href="#i-clock-plus"/></svg> Set expiration (exp)</div>
+            <div class="wire-row"><span class="radio"></span> 5 minutes <span class="meta">now + 300s</span></div>
+            <div class="wire-row"><span class="radio on"></span> 1 hour <span class="meta">now + 3600s</span></div>
+            <div class="wire-row"><span class="radio"></span> 1 day <span class="meta">now + 86400s</span></div>
+            <div class="wire-row"><span class="radio"></span> 1 year <span class="meta">now + 31536000s</span></div>
+          </div>
+        </div>
+        <div class="feature-copy">
+          <h3>Expiration with one tap</h3>
+          <p>
+            Set the <code>exp</code> claim to <em>now + preset</em> — from 5 minutes to 1 year —
+            written straight into the payload. Perfect for quickly minting short-lived tokens
+            for tests or long-lived ones for local development.
+          </p>
+          <ul>
+            <li><svg class="ti" aria-hidden="true"><use href="#i-check"/></svg> Presets from 5 minutes to 1 year</li>
+            <li><svg class="ti" aria-hidden="true"><use href="#i-check"/></svg> Written directly into the payload JSON</li>
+            <li><svg class="ti" aria-hidden="true"><use href="#i-check"/></svg> System light/dark theme follows your OS</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Privacy ================= -->
+    <section id="privacy" class="privacy">
+      <p class="kicker">Privacy</p>
+      <h2 class="sec-title">Local by design. Zero telemetry.</h2>
+      <p class="sec-sub">
+        Signing secrets are sensitive — so JWT Workbench never lets them leave your machine.
+        Data lives in <code style="font-family: var(--mono); font-size: 15px">chrome.storage.local</code>
+        on this browser profile only, deliberately not synced to the cloud.
+      </p>
+      <div class="privacy-grid">
+        <div class="privacy-cell">
+          <svg class="ti" aria-hidden="true"><use href="#i-wifi-off"/></svg>
+          <b>No network requests</b>
+          <p>The extension never talks to a server. Nothing is uploaded, ever.</p>
+        </div>
+        <div class="privacy-cell">
+          <svg class="ti" aria-hidden="true"><use href="#i-database"/></svg>
+          <b>Local storage only</b>
+          <p>Projects &amp; secrets stay on this browser profile — not synced, no cloud quotas.</p>
+        </div>
+        <div class="privacy-cell">
+          <svg class="ti" aria-hidden="true"><use href="#i-clipboard-check"/></svg>
+          <b>Clipboard on demand</b>
+          <p>Read only when you press “Decode from clipboard” — never in the background.</p>
+        </div>
+        <div class="privacy-cell">
+          <svg class="ti" aria-hidden="true"><use href="#i-code"/></svg>
+          <b>No remote code</b>
+          <p>All code ships in the package. Open source under the MIT license.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Grid ================= -->
+    <section>
+      <p class="kicker">At a glance</p>
+      <h2 class="sec-title">Built for people who live in tokens</h2>
+      <p class="sec-sub">
+        Backend, frontend, QA, support, and API debugging — anyone who works with
+        authentication tokens and wants a fast, private tool close at hand.
+      </p>
+      <div class="grid">
+        <div class="cell">
+          <svg class="ti" aria-hidden="true"><use href="#i-pencil-code"/></svg>
+          <b>JSON editors with highlighting</b>
+          <p>Header and payload as real JSON with live syntax highlighting and formatting.</p>
+        </div>
+        <div class="cell">
+          <svg class="ti" aria-hidden="true"><use href="#i-refresh"/></svg>
+          <b>Real-time signing</b>
+          <p>The signed token updates on every keystroke — pick an algorithm and go.</p>
+        </div>
+        <div class="cell">
+          <svg class="ti" aria-hidden="true"><use href="#i-clipboard-text"/></svg>
+          <b>Decode from clipboard</b>
+          <p>Copy a bearer token anywhere, press one button, read the claims instantly.</p>
+        </div>
+        <div class="cell">
+          <svg class="ti" aria-hidden="true"><use href="#i-shield-check"/></svg>
+          <b>Signature verification</b>
+          <p>Verify against a saved or pasted secret and get a clear verified / failed result.</p>
+        </div>
+        <div class="cell">
+          <svg class="ti" aria-hidden="true"><use href="#i-folders"/></svg>
+          <b>Projects</b>
+          <p>Save header + payload + secret as named projects with full create/rename/delete.</p>
+        </div>
+        <div class="cell">
+          <svg class="ti" aria-hidden="true"><use href="#i-key"/></svg>
+          <b>Secret library</b>
+          <p>Reusable signing secrets with friendly names, in both encoder and decoder.</p>
+        </div>
+        <div class="cell">
+          <svg class="ti" aria-hidden="true"><use href="#i-clock-plus"/></svg>
+          <b>Expiration presets</b>
+          <p>Write an exp claim of now + 5 minutes up to 1 year with a single tap.</p>
+        </div>
+        <div class="cell">
+          <svg class="ti" aria-hidden="true"><use href="#i-moon-stars"/></svg>
+          <b>System theme</b>
+          <p>Light and dark mode follow your OS automatically — nothing to configure.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Install ================= -->
+    <section id="install">
+      <p class="kicker">Install</p>
+      <h2 class="sec-title">Up and running in a minute</h2>
+      <p class="sec-sub">Install from the Chrome Web Store, or load a local build if you prefer to build from source.</p>
+      <div class="steps">
+        <div class="step">
+          <b>Install</b>
+          <p>Add JWT Workbench from the Chrome Web Store — or run <code>pnpm build</code> and load <code>.output/chrome-mv3</code> unpacked.</p>
+        </div>
+        <div class="step">
+          <b>Open the side panel</b>
+          <p>Click the JWT Workbench icon in the toolbar. The workbench opens beside whatever page you're on.</p>
+        </div>
+        <div class="step">
+          <b>Work with tokens</b>
+          <p>Decode from the clipboard, edit claims, re-sign, verify — and save the setup as a project for next time.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CTA ================= -->
+    <section>
+      <div class="cta">
+        <h2>Your JWT toolkit,<br />one click away.</h2>
+        <p>Free and open source. No account, no tracking, no server — just tokens, done right.</p>
+        <div class="cta-btns">
+          <a class="btn" href="https://chrome.google.com/webstore" target="_blank" rel="noopener">Add to Chrome</a>
+          <a class="btn ghost" href="https://github.com/mavor-app/jwt-workbench" target="_blank" rel="noopener">Star on GitHub</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Footer ================= -->
+    <footer>
+      <a class="logo" href="#"><img src="icon/32.png" alt="" width="22" height="22" />JWT Workbench</a>
+      <div class="links">
+        <a href="#features">Features</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/mavor-app/jwt-workbench" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/mavor-app/jwt-workbench/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <span class="note">No network requests · No data collected · Built with WXT, React &amp; jose</span>
+    </footer>
+  </div>
+
+</body>
+</html>
