@@ -5,16 +5,36 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta
             name="description"
-            content="JWT Workbench — a fast, private JSON Web Token toolkit in your browser's side panel. Encode, decode, verify and manage JWTs. 100% local, no network requests."
+            content="JWT Workbench — the JWT toolkit that remembers. 100% local in your browser's side panel: encode, decode, verify, and save tokens as projects with a reusable secret library. No website, no server, zero network requests."
         />
         <title>
-            JWT Workbench — The JWT toolkit that lives in your side panel
+            JWT Workbench — Manage JWTs by project, with reusable secrets. 100%
+            local
         </title>
         <link rel="icon" type="image/png" sizes="16x16" href="icon/16.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="icon/32.png" />
         <link rel="apple-touch-icon" href="icon/128.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossorigin
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Momo+Trust+Display&display=swap"
+            rel="stylesheet"
+        />
+        <script>
+            // Apply a stored theme override before first paint to avoid a flash.
+            try {
+                var t = localStorage.getItem('jwtw-theme');
+                if (t === 'light' || t === 'dark')
+                    document.documentElement.setAttribute('data-theme', t);
+            } catch (e) {}
+        </script>
         <style>
             :root {
+                color-scheme: light;
                 --ink: #111111;
                 --text: #444444;
                 --muted: #8a8a8a;
@@ -23,6 +43,11 @@
                 --line-soft: #dddddd;
                 --bg: #ffffff;
                 --bg-soft: #f5f5f4;
+                --ghost: #ececeb;
+                --shadow: rgba(17, 17, 17, 0.06);
+                --on-ink: #ffffff;
+                --on-ink-muted: #bbbbbb;
+                --on-ink-line: #555555;
                 --radius: 6px;
                 --font:
                     'Helvetica Neue', -apple-system, BlinkMacSystemFont,
@@ -30,6 +55,44 @@
                 --mono:
                     ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
                     'Liberation Mono', monospace;
+            }
+
+            /* Dark palette: applies when the system prefers dark (and the user
+               hasn't forced light), or when the user forces dark. */
+            @media (prefers-color-scheme: dark) {
+                :root:not([data-theme='light']) {
+                    color-scheme: dark;
+                    --ink: #f0f0ee;
+                    --text: #b3b3b0;
+                    --muted: #8b8b88;
+                    --faint: #5f5f5c;
+                    --line: #f0f0ee;
+                    --line-soft: #32322f;
+                    --bg: #141413;
+                    --bg-soft: #1e1e1c;
+                    --ghost: #262624;
+                    --shadow: rgba(0, 0, 0, 0.4);
+                    --on-ink: #141413;
+                    --on-ink-muted: #555555;
+                    --on-ink-line: #a0a09d;
+                }
+            }
+
+            :root[data-theme='dark'] {
+                color-scheme: dark;
+                --ink: #f0f0ee;
+                --text: #b3b3b0;
+                --muted: #8b8b88;
+                --faint: #5f5f5c;
+                --line: #f0f0ee;
+                --line-soft: #32322f;
+                --bg: #141413;
+                --bg-soft: #1e1e1c;
+                --ghost: #262624;
+                --shadow: rgba(0, 0, 0, 0.4);
+                --on-ink: #141413;
+                --on-ink-muted: #555555;
+                --on-ink-line: #a0a09d;
             }
 
             svg.ti {
@@ -123,7 +186,7 @@
                 align-items: center;
                 gap: 9px;
                 background: var(--ink);
-                color: #fff;
+                color: var(--on-ink);
                 font-size: 15px;
                 font-weight: 500;
                 padding: 11px 24px;
@@ -142,11 +205,108 @@
                 border: 1px solid var(--ink);
             }
 
+            .theme-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 30px;
+                height: 30px;
+                padding: 0;
+                border: 1px solid var(--line-soft);
+                border-radius: 999px;
+                background: transparent;
+                color: var(--ink);
+                font-size: 15px;
+                font-family: inherit;
+                cursor: pointer;
+                transition: border-color 0.15s ease;
+            }
+
+            .theme-btn:hover {
+                border-color: var(--ink);
+            }
+
+            /* Applied only once Momo Trust Display has actually loaded
+               (html.font-momo is set by the loader script); otherwise the
+               default stack and weights below stay untouched. */
+            html.font-momo .logo,
+            html.font-momo .hero h1,
+            html.font-momo .sec-title,
+            html.font-momo .feature h3,
+            html.font-momo .cta h2,
+            html.font-momo footer .note {
+                font-family: 'Momo Trust Display', var(--font);
+                font-weight: 400;
+            }
+
+            html.font-momo .hero h1 {
+                letter-spacing: -0.5px;
+            }
+
+            html.font-momo .sec-title,
+            html.font-momo .cta h2 {
+                letter-spacing: -0.4px;
+            }
+
+            html.font-momo .feature h3 {
+                letter-spacing: -0.2px;
+            }
+
+            .theme-wrap {
+                position: relative;
+                display: inline-flex;
+            }
+
+            .theme-menu {
+                position: absolute;
+                top: calc(100% + 8px);
+                right: 0;
+                min-width: 132px;
+                padding: 5px;
+                background: var(--bg);
+                border: 1px solid var(--line-soft);
+                border-radius: 8px;
+                box-shadow: 4px 4px 0 var(--shadow);
+                display: none;
+                z-index: 50;
+            }
+
+            .theme-menu.open {
+                display: block;
+            }
+
+            .theme-item {
+                display: flex;
+                align-items: center;
+                gap: 9px;
+                width: 100%;
+                padding: 7px 10px;
+                border: 0;
+                border-radius: 5px;
+                background: transparent;
+                font-family: inherit;
+                font-size: 13.5px;
+                font-weight: 500;
+                color: var(--ink);
+                text-align: left;
+                cursor: pointer;
+            }
+
+            .theme-item:hover {
+                background: var(--bg-soft);
+            }
+
+            .theme-item .check {
+                margin-left: auto;
+                visibility: hidden;
+            }
+
+            .theme-item[aria-checked='true'] .check {
+                visibility: visible;
+            }
+
             @media (max-width: 760px) {
                 .nav-links {
-                    display: none;
-                }
-                .nav-right {
                     display: none;
                 }
             }
@@ -194,10 +354,6 @@
                 color: var(--text);
             }
 
-            .hero-note svg.ti {
-                font-size: 17px;
-            }
-
             /* ---------- Hero visual (wireframe) ---------- */
 
             .stage {
@@ -229,11 +385,11 @@
             .float-card {
                 border: 1px solid var(--ink);
                 border-radius: var(--radius);
-                background: #fff;
+                background: var(--bg);
                 padding: 16px 18px;
                 text-align: left;
                 font-size: 13.5px;
-                box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.06);
+                box-shadow: 4px 4px 0 var(--shadow);
             }
 
             .float-card b {
@@ -267,10 +423,10 @@
             .browser {
                 border: 1px solid var(--ink);
                 border-radius: 8px;
-                background: #fff;
+                background: var(--bg);
                 overflow: hidden;
                 text-align: left;
-                box-shadow: 6px 6px 0 rgba(17, 17, 17, 0.06);
+                box-shadow: 6px 6px 0 var(--shadow);
             }
 
             .browser-top {
@@ -319,7 +475,7 @@
             .ghost-line {
                 height: 9px;
                 border-radius: 999px;
-                background: #ececeb;
+                background: var(--ghost);
                 margin-bottom: 12px;
             }
 
@@ -336,7 +492,7 @@
                 border-left: 1px solid var(--ink);
                 padding: 16px;
                 font-size: 12px;
-                background: #fff;
+                background: var(--bg);
             }
 
             .sp-head {
@@ -371,7 +527,7 @@
             }
             .sp-tab.on {
                 background: var(--ink);
-                color: #fff;
+                color: var(--on-ink);
             }
 
             .sp-label {
@@ -412,10 +568,10 @@
                 font-weight: 700;
             }
             .sp-token .t2 {
-                color: #6b6b6b;
+                color: var(--muted);
             }
             .sp-token .t3 {
-                color: #9c9c9c;
+                color: var(--faint);
             }
 
             .sp-row {
@@ -440,7 +596,7 @@
 
             .tag.fill {
                 background: var(--ink);
-                color: #fff;
+                color: var(--on-ink);
             }
 
             /* ---------- Proof strip ---------- */
@@ -578,10 +734,10 @@
             .wire {
                 border: 1px solid var(--ink);
                 border-radius: 8px;
-                background: #fff;
+                background: var(--bg);
                 padding: 20px;
                 font-size: 13px;
-                box-shadow: 6px 6px 0 rgba(17, 17, 17, 0.06);
+                box-shadow: 6px 6px 0 var(--shadow);
             }
 
             .wire + .wire {
@@ -638,7 +794,7 @@
             }
 
             .wire-row .radio.on {
-                box-shadow: inset 0 0 0 3.5px #fff;
+                box-shadow: inset 0 0 0 3.5px var(--bg);
                 background: var(--ink);
             }
 
@@ -705,7 +861,7 @@
 
             .cell:hover {
                 border-color: var(--ink);
-                box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.08);
+                box-shadow: 4px 4px 0 var(--shadow);
             }
 
             .cell svg.ti {
@@ -737,7 +893,7 @@
                 border: 1px solid var(--ink);
                 border-radius: 8px;
                 padding: 28px;
-                box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.06);
+                box-shadow: 4px 4px 0 var(--shadow);
             }
 
             .step::before {
@@ -778,11 +934,11 @@
                 border-radius: 12px;
                 text-align: center;
                 padding: clamp(52px, 8vw, 88px) 28px;
-                color: #bbbbbb;
+                color: var(--on-ink-muted);
             }
 
             .cta h2 {
-                color: #fff;
+                color: var(--on-ink);
                 font-size: clamp(30px, 4.6vw, 48px);
                 font-weight: 700;
                 letter-spacing: -1.4px;
@@ -805,15 +961,15 @@
             }
 
             .cta .btn {
-                background: #fff;
+                background: var(--on-ink);
                 color: var(--ink);
                 font-size: 16px;
                 padding: 14px 30px;
             }
             .cta .btn.ghost {
                 background: transparent;
-                color: #fff;
-                border: 1px solid #555;
+                color: var(--on-ink);
+                border: 1px solid var(--on-ink-line);
             }
 
             /* ---------- Footer ---------- */
@@ -852,6 +1008,10 @@
                 }
             }
         </style>
+        <meta
+            name="google-site-verification"
+            content="SMp4mD21t9LbfEE8rmzdZaiW6TEzmu6fAn7zgddKemI"
+        />
     </head>
     <body>
         <svg
@@ -954,6 +1114,20 @@
                 <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
                 <path d="M8 11v-4a4 4 0 1 1 8 0v4" />
             </symbol>
+            <symbol id="i-sun" viewBox="0 0 24 24">
+                <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                <path
+                    d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"
+                />
+            </symbol>
+            <symbol id="i-device-desktop" viewBox="0 0 24 24">
+                <path
+                    d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-10z"
+                />
+                <path d="M7 20h10" />
+                <path d="M9 16v4" />
+                <path d="M15 16v4" />
+            </symbol>
             <symbol id="i-moon-stars" viewBox="0 0 24 24">
                 <path
                     d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"
@@ -1013,23 +1187,78 @@
                         rel="noopener"
                         >GitHub</a
                     >
-                    <a
-                        class="btn"
-                        href="https://chromewebstore.google.com/detail/lkgfghlfpocpcplcgjnipdkdaajhbnff"
-                        target="_blank"
-                        rel="noopener"
-                        >Add to Chrome</a
-                    >
+                    <div class="theme-wrap">
+                        <button
+                            id="theme-toggle"
+                            class="theme-btn"
+                            type="button"
+                            aria-haspopup="menu"
+                            aria-expanded="false"
+                            aria-label="Theme: system"
+                            title="Theme: system"
+                        >
+                            <svg class="ti" aria-hidden="true">
+                                <use href="#i-device-desktop" />
+                            </svg>
+                        </button>
+                        <div id="theme-menu" class="theme-menu" role="menu">
+                            <button
+                                class="theme-item"
+                                type="button"
+                                role="menuitemradio"
+                                data-mode="system"
+                                aria-checked="true"
+                            >
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-device-desktop" />
+                                </svg>
+                                System
+                                <svg class="ti check" aria-hidden="true">
+                                    <use href="#i-check" />
+                                </svg>
+                            </button>
+                            <button
+                                class="theme-item"
+                                type="button"
+                                role="menuitemradio"
+                                data-mode="light"
+                                aria-checked="false"
+                            >
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-sun" />
+                                </svg>
+                                Light
+                                <svg class="ti check" aria-hidden="true">
+                                    <use href="#i-check" />
+                                </svg>
+                            </button>
+                            <button
+                                class="theme-item"
+                                type="button"
+                                role="menuitemradio"
+                                data-mode="dark"
+                                aria-checked="false"
+                            >
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-moon-stars" />
+                                </svg>
+                                Dark
+                                <svg class="ti check" aria-hidden="true">
+                                    <use href="#i-check" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </nav>
 
             <!-- ================= Hero ================= -->
             <header class="hero">
-                <h1>The JWT toolkit<br />that lives in your side panel</h1>
+                <h1>The JWT toolkit<br />that remembers</h1>
                 <p class="hero-sub">
-                    Encode, decode, verify, and manage JSON Web Tokens without
-                    switching tabs — everything runs locally, so your tokens and
-                    secrets never leave the browser.
+                    Save each token as a named project — header, payload, and
+                    secret together. Reuse secrets across services. 100% local
+                    in your side panel: nothing ever leaves the browser.
                 </p>
                 <div class="hero-cta">
                     <a
@@ -1037,15 +1266,12 @@
                         href="https://chromewebstore.google.com/detail/lkgfghlfpocpcplcgjnipdkdaajhbnff"
                         target="_blank"
                         rel="noopener"
+                        ><svg class="ti" aria-hidden="true">
+                            <use href="#i-brand-chrome" /></svg
                         >Add to Chrome</a
                     >
                 </div>
-                <div class="hero-note">
-                    <svg class="ti" aria-hidden="true">
-                        <use href="#i-brand-chrome" />
-                    </svg>
-                    Available in the Chrome Web Store
-                </div>
+                <div class="hero-note">Available in the Chrome Web Store</div>
 
                 <!-- wireframe hero visual (no screenshots) -->
                 <div
@@ -1184,7 +1410,7 @@
                             <b>100%</b><span>local &amp; private</span>
                         </div>
                         <div class="stat">
-                            <b>3</b><span>HMAC algorithms</span>
+                            <b>∞</b><span>saved projects &amp; secrets</span>
                         </div>
                         <div class="stat">
                             <b>MIT</b><span>open source</span>
@@ -1197,146 +1423,24 @@
             <section id="features">
                 <p class="kicker">Features</p>
                 <h2 class="sec-title">
-                    Everything a token workflow needs,<br />one click away
+                    A workbench, not another<br />paste-and-forget decoder
                 </h2>
                 <p class="sec-sub">
-                    Keep it open beside your app, API console, docs, or logs
-                    while you inspect bearer tokens, edit claims, re-sign
-                    payloads, and verify signatures.
+                    No tab switching, no re-typing payloads, no digging up that
+                    signing secret again. Keep it open beside your app, API
+                    console, docs, or logs — inspect, edit, re-sign, verify,
+                    then save the whole setup for next time.
                 </p>
-
-                <!-- Encoder -->
-                <div class="feature">
-                    <div class="feature-copy">
-                        <h3>Encode &amp; re-sign tokens in real time</h3>
-                        <p>
-                            Edit the header and payload as JSON with live syntax
-                            highlighting and one-click formatting. The signed
-                            token updates as you type.
-                        </p>
-                        <ul>
-                            <li>
-                                <svg class="ti" aria-hidden="true">
-                                    <use href="#i-check" />
-                                </svg>
-                                Choose HS256, HS384, or HS512 from a dropdown
-                            </li>
-                            <li>
-                                <svg class="ti" aria-hidden="true">
-                                    <use href="#i-check" />
-                                </svg>
-                                Live, highlighted output token
-                            </li>
-                            <li>
-                                <svg class="ti" aria-hidden="true">
-                                    <use href="#i-check" />
-                                </svg>
-                                Copy the finished token with one click
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="visual">
-                        <div class="wire">
-                            <div class="wire-head">
-                                <svg class="ti" aria-hidden="true">
-                                    <use href="#i-lock" />
-                                </svg>
-                                Which algorithm would you like to sign with?
-                            </div>
-                            <div class="wire-row">
-                                <span class="radio on"></span> HS256
-                                <span class="meta">HMAC · SHA-256</span>
-                            </div>
-                            <div class="wire-row">
-                                <span class="radio"></span> HS384
-                                <span class="meta">HMAC · SHA-384</span>
-                            </div>
-                            <div class="wire-row">
-                                <span class="radio"></span> HS512
-                                <span class="meta">HMAC · SHA-512</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Decoder -->
-                <div class="feature flip">
-                    <div class="visual">
-                        <div class="wire">
-                            <div class="wire-head">
-                                <svg class="ti" aria-hidden="true">
-                                    <use href="#i-clipboard-text" />
-                                </svg>
-                                Decode from clipboard
-                            </div>
-                            <div class="sp-code">
-                                "sub": "user-42", "iat": 1751846400 → Jul 7,
-                                2026 08:00 "exp": 1751850000 → Jul 7, 2026 09:00
-                            </div>
-                            <div class="sp-row" style="margin-top: 14px">
-                                <span class="tag"
-                                    ><svg class="ti" aria-hidden="true">
-                                        <use href="#i-clock-x" />
-                                    </svg>
-                                    Expired</span
-                                >
-                                <span class="tag"
-                                    ><svg class="ti" aria-hidden="true">
-                                        <use href="#i-shield-check" />
-                                    </svg>
-                                    Signature verified</span
-                                >
-                            </div>
-                        </div>
-                    </div>
-                    <div class="feature-copy">
-                        <h3>Decode any token in one click</h3>
-                        <p>
-                            One button decodes a JWT straight from your
-                            clipboard — or paste it manually. The clipboard is
-                            read only when you press the button.
-                        </p>
-                        <ul>
-                            <li>
-                                <svg class="ti" aria-hidden="true">
-                                    <use href="#i-check" />
-                                </svg>
-                                Highlighted header &amp; payload JSON
-                            </li>
-                            <li>
-                                <svg class="ti" aria-hidden="true">
-                                    <use href="#i-check" />
-                                </svg>
-                                Human-readable <code>exp</code> /
-                                <code>iat</code> / <code>nbf</code> timestamps
-                            </li>
-                            <li>
-                                <svg class="ti" aria-hidden="true">
-                                    <use href="#i-check" />
-                                </svg>
-                                “Expired” badge &amp; optional signature
-                                verification
-                            </li>
-                            <li>
-                                <svg class="ti" aria-hidden="true">
-                                    <use href="#i-check" />
-                                </svg>
-                                Turn any decoded token into a project in one
-                                click
-                            </li>
-                        </ul>
-                    </div>
-                </div>
 
                 <!-- Projects & secrets -->
                 <div class="feature">
                     <div class="feature-copy">
-                        <h3>Reusable projects &amp; a secret library</h3>
+                        <h3>Projects: the part every other JWT tool forgets</h3>
                         <p>
-                            Stop rebuilding the same test tokens from scratch.
-                            Save header + payload + secret as a named project,
-                            reopen it later, tweak a claim, and copy a fresh
-                            token.
+                            Most decoders are stateless — close the tab and your
+                            payload, header, and secret are gone. JWT Workbench
+                            saves them together as a named project per service:
+                            reopen it later, tweak a claim, copy a fresh token.
                         </p>
                         <ul>
                             <li>
@@ -1411,6 +1515,131 @@
                     </div>
                 </div>
 
+                <!-- Decoder -->
+                <div class="feature flip">
+                    <div class="visual">
+                        <div class="wire">
+                            <div class="wire-head">
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-clipboard-text" />
+                                </svg>
+                                Decode from clipboard
+                            </div>
+                            <div class="sp-code">
+                                "sub": "user-42", "iat": 1751846400 → Jul 7,
+                                2026 08:00 "exp": 1751850000 → Jul 7, 2026 09:00
+                            </div>
+                            <div class="sp-row" style="margin-top: 14px">
+                                <span class="tag"
+                                    ><svg class="ti" aria-hidden="true">
+                                        <use href="#i-clock-x" />
+                                    </svg>
+                                    Expired</span
+                                >
+                                <span class="tag"
+                                    ><svg class="ti" aria-hidden="true">
+                                        <use href="#i-shield-check" />
+                                    </svg>
+                                    Signature verified</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-copy">
+                        <h3>Decode any token in one click</h3>
+                        <p>
+                            Copy a bearer token from DevTools or a log, press
+                            one button, and read the claims — no pasting
+                            production tokens into a website. The clipboard is
+                            read only when you press the button, and nothing
+                            ever leaves your machine.
+                        </p>
+                        <ul>
+                            <li>
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-check" />
+                                </svg>
+                                Highlighted header &amp; payload JSON
+                            </li>
+                            <li>
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-check" />
+                                </svg>
+                                Human-readable <code>exp</code> /
+                                <code>iat</code> / <code>nbf</code> timestamps
+                            </li>
+                            <li>
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-check" />
+                                </svg>
+                                “Expired” badge &amp; optional signature
+                                verification
+                            </li>
+                            <li>
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-check" />
+                                </svg>
+                                Turn any decoded token into a project in one
+                                click
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Encoder -->
+                <div class="feature">
+                    <div class="feature-copy">
+                        <h3>Encode &amp; re-sign tokens in real time</h3>
+                        <p>
+                            Edit the header and payload as JSON with live syntax
+                            highlighting and one-click formatting. The signed
+                            token updates as you type.
+                        </p>
+                        <ul>
+                            <li>
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-check" />
+                                </svg>
+                                Choose HS256, HS384, or HS512 from a dropdown
+                            </li>
+                            <li>
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-check" />
+                                </svg>
+                                Live, highlighted output token
+                            </li>
+                            <li>
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-check" />
+                                </svg>
+                                Copy the finished token with one click
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="visual">
+                        <div class="wire">
+                            <div class="wire-head">
+                                <svg class="ti" aria-hidden="true">
+                                    <use href="#i-lock" />
+                                </svg>
+                                Which algorithm would you like to sign with?
+                            </div>
+                            <div class="wire-row">
+                                <span class="radio on"></span> HS256
+                                <span class="meta">HMAC · SHA-256</span>
+                            </div>
+                            <div class="wire-row">
+                                <span class="radio"></span> HS384
+                                <span class="meta">HMAC · SHA-384</span>
+                            </div>
+                            <div class="wire-row">
+                                <span class="radio"></span> HS512
+                                <span class="meta">HMAC · SHA-512</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Expiration presets -->
                 <div class="feature flip">
                     <div class="visual">
@@ -1477,13 +1706,14 @@
                 <p class="kicker">Privacy</p>
                 <h2 class="sec-title">Local by design. Zero telemetry.</h2>
                 <p class="sec-sub">
-                    Signing secrets are sensitive — so JWT Workbench never lets
-                    them leave your machine. Data lives in
+                    Every online decoder asks you to trust a stranger's server
+                    with your signing secrets. JWT Workbench has no server to
+                    trust: data lives in
                     <code style="font-family: var(--mono); font-size: 15px"
                         >chrome.storage.local</code
                     >
-                    on this browser profile only, deliberately not synced to the
-                    cloud.
+                    on this browser profile only — deliberately kept off cloud
+                    sync, because secrets don't belong in the cloud.
                 </p>
                 <div class="privacy-grid">
                     <div class="privacy-cell">
@@ -1534,9 +1764,10 @@
                 <p class="kicker">At a glance</p>
                 <h2 class="sec-title">Built for people who live in tokens</h2>
                 <p class="sec-sub">
-                    Backend, frontend, QA, support, and API debugging — anyone
-                    who works with authentication tokens and wants a fast,
-                    private tool close at hand.
+                    Backend, frontend, QA, support, and API debugging — if you
+                    decode the same tokens for the same services every week, you
+                    want a tool that's private, one click away, and already set
+                    up.
                 </p>
                 <div class="grid">
                     <div class="cell">
@@ -1585,8 +1816,8 @@
                         </svg>
                         <b>Projects</b>
                         <p>
-                            Save header + payload + secret as named projects
-                            with full create/rename/delete.
+                            One named setup per service — header, payload, and
+                            secret saved together, restored on reopen.
                         </p>
                     </div>
                     <div class="cell">
@@ -1595,8 +1826,9 @@
                         </svg>
                         <b>Secret library</b>
                         <p>
-                            Reusable signing secrets with friendly names, in
-                            both encoder and decoder.
+                            Save secrets once as <em>staging-api</em> or
+                            <em>prod-webhooks</em> — reuse them everywhere, stop
+                            hunting through .env files.
                         </p>
                     </div>
                     <div class="cell">
@@ -1671,10 +1903,11 @@
             <!-- ================= CTA ================= -->
             <section>
                 <div class="cta">
-                    <h2>Your JWT toolkit,<br />one click away.</h2>
+                    <h2>Stop pasting tokens<br />into websites.</h2>
                     <p>
-                        Free and open source. No account, no tracking, no server
-                        — just tokens, done right.
+                        A JWT toolkit that's local, private, and remembers your
+                        projects. Free and open source — no account, no
+                        tracking, no server.
                     </p>
                     <div class="cta-btns">
                         <a
@@ -1723,5 +1956,86 @@
                 >
             </footer>
         </div>
+
+        <script>
+            (() => {
+                const KEY = 'jwtw-theme';
+                const MODES = ['system', 'light', 'dark'];
+                const ICONS = {
+                    system: '#i-device-desktop',
+                    light: '#i-sun',
+                    dark: '#i-moon-stars',
+                };
+                const root = document.documentElement;
+                const btn = document.getElementById('theme-toggle');
+                const menu = document.getElementById('theme-menu');
+                const items = menu.querySelectorAll('.theme-item');
+
+                let mode;
+                try {
+                    mode = localStorage.getItem(KEY);
+                } catch (e) {}
+                if (!MODES.includes(mode)) mode = 'system';
+
+                const apply = () => {
+                    if (mode === 'system') root.removeAttribute('data-theme');
+                    else root.setAttribute('data-theme', mode);
+                    try {
+                        if (mode === 'system') localStorage.removeItem(KEY);
+                        else localStorage.setItem(KEY, mode);
+                    } catch (e) {}
+                    btn.querySelector('use').setAttribute('href', ICONS[mode]);
+                    btn.title = 'Theme: ' + mode;
+                    btn.setAttribute('aria-label', 'Theme: ' + mode);
+                    items.forEach((it) =>
+                        it.setAttribute(
+                            'aria-checked',
+                            String(it.dataset.mode === mode),
+                        ),
+                    );
+                };
+
+                const setOpen = (open) => {
+                    menu.classList.toggle('open', open);
+                    btn.setAttribute('aria-expanded', String(open));
+                };
+
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    setOpen(!menu.classList.contains('open'));
+                });
+
+                items.forEach((it) =>
+                    it.addEventListener('click', () => {
+                        mode = it.dataset.mode;
+                        apply();
+                        setOpen(false);
+                    }),
+                );
+
+                document.addEventListener('click', (e) => {
+                    if (!menu.contains(e.target)) setOpen(false);
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') setOpen(false);
+                });
+
+                apply();
+            })();
+
+            // Opt into the display font only if it actually loads; on any
+            // failure the default font stack stays in effect.
+            if (document.fonts && document.fonts.load) {
+                document.fonts
+                    .load('1em "Momo Trust Display"')
+                    .then((fonts) => {
+                        if (fonts.length)
+                            document.documentElement.classList.add(
+                                'font-momo',
+                            );
+                    })
+                    .catch(() => {});
+            }
+        </script>
     </body>
 </html>
