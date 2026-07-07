@@ -2,7 +2,7 @@
 
 A fast, private JSON Web Token toolkit that lives in your browser's **side panel** — one click away while you work. Unlike online decoders, everything runs locally: your tokens, payloads, and secrets never leave the browser and no network requests are made.
 
-![Side panel with the Encoder and Decoder tabs](docs/screenshot-encoder.png)
+![Side panel with the Encoder and Decoder tabs](docs/marketing/jwt-screenshot1.png)
 
 ## Features
 
